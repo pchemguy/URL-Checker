@@ -4,24 +4,24 @@
 for /f "usebackq delims=" %%G in ("headers.txt") do (
     set HEADERS=!HEADERS! --header "%%G"
 )
-set WGETCMD=wget^
- --server-response^
- --spider^
- --quiet^
+set CURLCMD=curl -L -s^
+ -c cookies.txt ^
  %HEADERS%^
- --keep-session-cookies^
- --load-cookies="cookies.txt"^
- --save-cookies "cookies.txt"
+ -w "%%{http_code}"^
+ -o "trash.$$$"
+
 
 (
   echo ==================== %DATE% %TIME% ====================
   echo.
 ) >>url_check_log.txt
 
+
 for /f "usebackq delims=" %%G in ("urls.txt") do (
   call :CHECK_URL "%%~G"
 ) >>url_check_log.txt
 echo.>>url_check_log.txt
+del /Q /F trash.$$$
 
 exit /b 0
 
@@ -34,13 +34,10 @@ exit /b 0
 setlocal
 
 set URL="%~1"
-for /f "usebackq delims=" %%G in (`%WGETCMD% %URL% 2^>^&1`) do (
-  set STATUS=%%G
-  set STATUS=!STATUS:~0,15!
-  echo !STATUS! %URL%
-  goto :EXIT_RESPNOSE_FOR
+set URL=!URL: =%%20!
+for /f "usebackq delims=" %%G in (`%CURLCMD% %URL% 2^>^&1`) do (
+  echo %%G %URL%
 )
-:EXIT_RESPNOSE_FOR
 
 endlocal
 
