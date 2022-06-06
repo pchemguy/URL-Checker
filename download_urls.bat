@@ -21,7 +21,10 @@ set CURLCMD=curl -L^
 
 if not exist "Downloads" md "Downloads" 1>nul
 for /f "usebackq delims=" %%G in ("urls.txt") do (
-  call :FILE_DOWNLOAD "%%~G"
+  set URL=%%~G
+  set URL=!URL:%%=%%%%!
+  set URL=!URL: =%%%%20!
+  call :FILE_DOWNLOAD "!URL!"
 ) >>url_download_log.txt
 echo.>>url_download_log.txt
 
@@ -37,7 +40,6 @@ setlocal
 
 set URL="%~1"
 set FILENAME="%~nx1"
-set URL=!URL: =%%20!
 
 echo URL     =%URL%
 echo FILENAME=%FILENAME%
