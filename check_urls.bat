@@ -18,10 +18,13 @@ set CURLCMD=curl -L -s^
 
 
 for /f "usebackq delims=" %%G in ("urls.txt") do (
-  call :CHECK_URL "%%~G"
+  set URL=%%~G
+  set URL=!URL:%%=%%%%!
+  set URL=!URL: =%%%%20!
+  call :CHECK_URL "!URL!"
 ) >>url_check_log.txt
 echo.>>url_check_log.txt
-del /Q /F trash.$$$
+if exist "trash.$$$" del /Q /F "trash.$$$" 1>nul
 
 exit /b 0
 
@@ -34,7 +37,6 @@ exit /b 0
 setlocal
 
 set URL="%~1"
-set URL=!URL: =%%20!
 for /f "usebackq delims=" %%G in (`%CURLCMD% %URL% 2^>^&1`) do (
   echo %%G %URL%
 )
