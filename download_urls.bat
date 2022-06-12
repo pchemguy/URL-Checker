@@ -25,7 +25,7 @@ for /f "usebackq delims=" %%G in ("urls.txt") do (
   set URL=!URL:%%=%%%%!
   set URL=!URL: =%%%%20!
   call :FILE_DOWNLOAD "!URL!"
-) >>url_download_log.txt
+)
 echo.>>url_download_log.txt
 
 exit /b 0
@@ -38,13 +38,28 @@ exit /b 0
 ::
 setlocal
 
-set URL="%~1"
-set FILENAME="%~nx1"
+set URL=%~1
+set FILENAME=%~nx1
+set FILENAME=!FILENAME:%%20= !
+
+if not exist "Downloads/%FILENAME%" (
+  echo ++++ Downloading ++++
+) else (
+  echo ---- Skipping ----
+)
 
 echo URL     =%URL%
 echo FILENAME=%FILENAME%
-%CURLCMD% %URL% -o "Downloads/%FILENAME%" 2>&1
 
+if exist "Downloads/%FILENAME%" (
+ goto :SKIP_DOWNLOAD
+)
+
+echo URL     =%URL% >>url_download_log.txt
+echo FILENAME=%FILENAME% >>url_download_log.txt
+%CURLCMD% "%URL%" -o "Downloads/%FILENAME%" 2>>url_download_log.txt
+
+:SKIP_DOWNLOAD
 endlocal
 
 exit /b 0
